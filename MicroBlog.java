@@ -5,10 +5,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.naming.LimitExceededException;
 
 public class MicroBlog implements SocialNetwork {
@@ -82,8 +80,6 @@ public class MicroBlog implements SocialNetwork {
                 this.likePost(currentReference, like);
             }
         }
-
-
     }
 
     /*
@@ -193,10 +189,14 @@ public class MicroBlog implements SocialNetwork {
             Post post = entry.getValue();
             boolean valid = true;
             for(String word : words) { // per ogni post, controllo che ciascuna delle parole in words sia contenuta nel testo del post
+                //System.out.println(post.getText() + " contains or not " + word);
                 if(!containsExactly(post.getText(), word)) {
+                   // System.out.println("no");
                     valid = false;
                     break; // se trovo una parola non contenuta, posso uscire dal ciclo più interno
                 }
+                //System.out.println("yes");
+
             }
             if(valid) {
                 outputList.add(post);
@@ -255,7 +255,7 @@ public class MicroBlog implements SocialNetwork {
         if(likedByUser == null) {
             throw new NullPointerException();
         }
-        if(likedByUser.trim().isEmpty()) {
+        if(likedByUser.trim().isEmpty() || postId < 0) {
             throw new IllegalArgumentException();
         }
 
@@ -286,7 +286,7 @@ public class MicroBlog implements SocialNetwork {
         if(unlikedByUser == null) {
             throw new NullPointerException();
         }
-        if(unlikedByUser.trim().isEmpty()) {
+        if(unlikedByUser.trim().isEmpty() || postId < 0) {
             throw new IllegalArgumentException();
         }
 
@@ -310,7 +310,7 @@ public class MicroBlog implements SocialNetwork {
     // THROWS: NullPointerException se likedBy è null ∨ ofAuthor è null (unchecked exception),
     //         IllegalArgumentException se likedBy.length = 0 ∨ likedBy ∈ /^\s+$/ ∨ ofAuthor.length = 0 ∨ ofAuthor ∈ /^\s+$/ (unchecked exception)
     // EFFECTS: restituisce il numero di post scritti dall'utente identificato da ofAuthor ai quali l'utente identificato da likedBy ha messo like
-    public int getNumberOfLikedPosts(String likedBy, String ofAuthor) throws NullPointerException, IllegalArgumentException {
+    private int getNumberOfLikedPosts(String likedBy, String ofAuthor) throws NullPointerException, IllegalArgumentException {
         if(likedBy == null || ofAuthor == null) {
             throw new NullPointerException();
         }
@@ -335,7 +335,7 @@ public class MicroBlog implements SocialNetwork {
     //         IllegalArgumentException se user.length = 0 ∨ user ∈ /^\s+$/) (unchecked exception)
     // EFFECTS: restituisce il numero di follower che l'utente user ha all'interno della rete (this)
     //          (dove tale numero è uguale alla sommatoria su tutte le chiavi delle occorrenze di user all'interno dei valori di tali chiavi)
-    public int getNumerOfFollowers(String user) throws NullPointerException, IllegalArgumentException {
+    private int getNumerOfFollowers(String user) throws NullPointerException, IllegalArgumentException {
         if(user == null) {
             throw new NullPointerException();
         }
@@ -351,7 +351,7 @@ public class MicroBlog implements SocialNetwork {
     //         IllegalArgumentException se (∃ (k, v) ∈ followers . (∃ s ∈ v . s è null ∨ s.length = 0 ∨ s ∈ /^\s+$/)) (unchecked exception)
     // EFFECTS: restituisce il numero di follower che l'utente user ha all'interno della map followers
     //          (dove tale numero è uguale alla sommatoria su tutte le chiavi delle occorrenze di user all'interno dei valori di tali chiavi)
-    public static int getNumerOfFollowers(String user, Map<String, Set<String>> followers) throws NullPointerException, IllegalArgumentException {
+    private static int getNumerOfFollowers(String user, Map<String, Set<String>> followers) throws NullPointerException, IllegalArgumentException {
         if(user == null) {
             throw new NullPointerException();
         }
@@ -419,15 +419,15 @@ public class MicroBlog implements SocialNetwork {
     //          Utilizza una espressione regolare e il word boundary per verificare che la parola *esatta* sia contenuta nella stringa,
     //          e non sia per esempio prefisso di una parola più lunga
     private boolean containsExactly(String str, String substr) {
-        String regex = "\\b" + substr + "\\b"; // creo un'espressione regolare -- \b è il word boundary, utilizzato per riconoscere l'inizio o la fine di una parola
+        String regex = ".*\\b" + substr + "\\b.*"; // creo un'espressione regolare -- \b è il word boundary, utilizzato per riconoscere l'inizio o la fine di una parola
         Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-        Matcher match = pattern.matcher(str); // cerco la parola substr all'interno della stringa str
+        Matcher matcher = pattern.matcher(str); // cerco la parola substr all'interno della stringa str
 
-        return match.matches();
+        return matcher.matches();
     }
 
     // EFFECTS: restituisce una lista contenente tutti i post che sono stati aggiunti alla rete
-    private List<Post> getAllPosts() {
+    public List<Post> getAllPosts() {
         List<Post> posts = new LinkedList<Post>();
 
         for(Map.Entry<Integer, Post> entry : this.postLookup.entrySet()) {

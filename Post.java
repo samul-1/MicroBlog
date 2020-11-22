@@ -31,7 +31,10 @@ public class Post implements Cloneable {
         ∀ 0 ≤ i < j < this.likes.length() . this.likes.get(i) ≠ this.likes.get(j)
     */
 
-    public Post(int id, String author, String text) throws LimitExceededException, IllegalArgumentException {
+    public Post(int id, String author, String text) throws NullPointerException, LimitExceededException, IllegalArgumentException {
+        if(author == null || text == null) {
+            throw new NullPointerException();
+        }
         if(id < 0 || author.trim().isEmpty() || text.trim().isEmpty()) {
             // l'id non può essere minore di 0; il nome dell'autore e il contenuto del post non possono essere vuoti o contenere solo spazi
             throw new IllegalArgumentException();
@@ -89,12 +92,12 @@ public class Post implements Cloneable {
 
     // EFFECTS: restituisce una rappresentazione dell'istanza (this) come stringa
     public String toString() {
-        return "Posted by " +
+        return "\"" +
+                this.text +
+                "\" - " +
                 this.author +
-                ", on " +
-                this.timestamp.toString() +
-                ": \"" +
-                this.text + "\".";
+                ", " +
+                this.timestamp.toString();
     }
 
     // REQUIRES: other ≠ null ∧ other è (un sottotipo di) Post
@@ -113,8 +116,8 @@ public class Post implements Cloneable {
     // EFFECTS: restituisce un numero maggiore di 0 se this > other,
     //                      0 se i due post sono uguali,
     //                      un numero minore di 0 se this < other,
-    // in base al seguente ordinamento totale:
-    // ∀ x, y istanze di Post . x > y ⟺ x.id > y.id
+    //          in base al seguente ordinamento totale:
+    //          ∀ x, y istanze di Post . x > y ⟺ x.id > y.id
     public int compareTo(Post other) throws NullPointerException {
         if(other == null) {
             throw new NullPointerException();
@@ -137,7 +140,7 @@ public class Post implements Cloneable {
         if(user.trim().isEmpty()) {
             throw new IllegalArgumentException();
         }
-        if(user == this.author) {
+        if(user.compareTo(this.author) == 0) {
             throw new IllegalStateException();
         }
         
@@ -181,7 +184,8 @@ public class Post implements Cloneable {
     // EFFECTS: restituisce una deep copy dell'istanza (this), utilizzabile dai metodi di SocialNetwork
     // che devono restituire liste di post senza violare l'information hiding e senza esporre la referenza privata al post
     public Post clone() {
-        try {
+        try { // il try catch è necessario perché il costruttore di Post può lanciare eccezioni checked,
+              // sebbene in questo caso nessuna eccezione verrà mai lanciata poiché this è un oggetto valido
             Post clone = new Post(this.id, this.author, this.text);
             clone.setTimestamp(this.timestamp);
 

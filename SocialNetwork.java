@@ -7,7 +7,8 @@ public interface SocialNetwork {
     // THROWS: NullPointerException se ps è null ∨ (∃ p ∈ ps . p è null) (unchecked exception)
     // EFFECTS: restituisce una map che associa a ogni utente inferito dalla lista ps gli utenti da esso seguiti
     //          Formalmente: se indichiamo con u ~ v la relazione per la quale u segue v, allora l'output è
-    //          una funzione f: String ↦ {String, ..., String} t.c. ∀ u utente . ∀ v utente . v ∈ f(u) ⟺ u ~ v
+    //          una funzione f: String ↦ {String, ..., String} t.c. ∀ u utente . ∀ v utente . v ∈ f(u) ⟺ u ~ v,
+    //          dove u ~ v ⟺ ∃ p post . p.getAuthor() = v ∧ u ∈ p.getLikes()
     public static Map<String, Set<String>> guessFollowers(List<Post> ps) throws NullPointerException {
         throw new UnsupportedOperationException(); // implementazione di default del metodo statico all'interno dell'interfaccia (richiesto dalla specifica di Java)
     }
